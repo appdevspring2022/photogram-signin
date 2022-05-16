@@ -5,7 +5,7 @@ class PhotosController < ApplicationController
   end
 
   def create
-    user_id = params.fetch("input_owner_id")
+    user_id = session.fetch(:user_id)
     image = params.fetch("input_image")
     caption = params.fetch("input_caption")
     photo = Photo.new
@@ -19,7 +19,11 @@ class PhotosController < ApplicationController
   def show
     p_id = params.fetch("the_photo_id")
     @photo = Photo.where({:id => p_id }).first
-    render({:template => "photos/details.html.erb"})
+    if @photo.owner_id == session.fetch(:user_id)
+      render({:template => "photos/details_myself.html.erb"})
+    else 
+      render({:template => "photos/details_others.html.erb"})
+    end
   end
 
   def destroy
