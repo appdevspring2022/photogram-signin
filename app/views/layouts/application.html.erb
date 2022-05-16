@@ -18,8 +18,10 @@
     <ul>
       <li><a href="/user_sign_up">Sign up</a></li>
       <li><a href="/user_sign_in">Sign in</a></li>
+      <li><a href="/user_sign_out">Sign out</a></li>
       <li><a href="/users">Users</a></li>
       <li><a href="/photos">Photos</a></li>
+      <li><%=session.fetch(:user_id)%></li>
     </ul>
     <% if notice.present? %>
       <div style="border: thin green solid; color: green;"><%= notice %></div>

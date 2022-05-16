@@ -1,7 +1,39 @@
 class UsersController < ApplicationController
-  def register
-    render({ :template => "users/sign_up.html" })
+  def authenticate
+    # get user name and password from user input
+    un = params.fetch("input_username")
+    pw = params.fetch("input_password")
 
+    # check if the user exist in the database
+    user = User.where({ :username => un }).at(0)
+
+    # if no, go back to sign in page
+    if user == nil
+      redirect_to("/user_sign_in", { :alert => "No one by this name round these parts." })
+      # if yes, check if password matches
+    else
+      # if yes, go to the homepage
+      if user.authenticate(pw)
+        session.store(:user_id, user.id)
+        redirect_to("/", {:notice=>"Welcome back, "+user.username+"!"})
+        # if no, go back to sign page
+      else
+        redirect_to("/user_sign_in", { :alert => "Password is wrong." })
+      end
+    end
+  end
+
+  def signin
+    render({ :template => "users/sign_in.html.erb" })
+  end
+
+  def toast_cookies
+    reset_session
+    redirect_to("/", :notice => "See you later!")
+  end
+
+  def register
+    render({ :template => "users/sign_up.html.erb" })
   end
 
   def index
@@ -27,9 +59,10 @@ class UsersController < ApplicationController
     save_status = user.save
 
     if save_status == true
-      redirect_to("/users/#{user.username}", {:notice=>"Welcome, "+user.username+"!"})
+      session.store(:user_id, user.id)
+      redirect_to("/users/#{user.username}", { :notice => "Welcome, " + user.username + "!" })
     else
-      redirect_to("/user_sign_up", {:alert=>user.errors.full_messages.to_sentence})
+      redirect_to("/user_sign_up", { :alert => user.errors.full_messages.to_sentence })
     end
   end
 
@@ -37,11 +70,10 @@ class UsersController < ApplicationController
     the_id = params.fetch("the_user_id")
     user = User.where({ :id => the_id }).at(0)
 
-
     user.username = params.fetch("input_username")
 
     user.save
-    
+
     redirect_to("/users/#{user.username}")
   end
 
@@ -53,5 +85,4 @@ class UsersController < ApplicationController
 
     redirect_to("/users")
   end
-
 end
